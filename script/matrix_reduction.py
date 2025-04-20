@@ -219,6 +219,48 @@ def print_steps(steps: List[str], title: str):
         print(step)
     print("=" * 50)
 
+def get_custom_matrix() -> np.ndarray:
+    """
+    Get a custom matrix from user input.
+    
+    Returns:
+        Custom matrix as a numpy array
+    """
+    while True:
+        try:
+            rows = int(input("Enter number of rows: "))
+            cols = int(input("Enter number of columns: "))
+            if rows > 0 and cols > 0:
+                break
+            print("Please enter positive integers for dimensions")
+        except ValueError:
+            print("Please enter valid integers")
+    
+    print("\nEnter matrix elements row by row:")
+    print("Use spaces to separate elements")
+    print("Press Enter after each row")
+    print("Press Enter twice when done\n")
+    
+    matrix_data = []
+    while True:
+        row_input = input()
+        if not row_input:  # Empty line means end of input
+            break
+        try:
+            row = [float(x) for x in row_input.split()]
+            if len(row) != cols:
+                print(f"Expected {cols} elements, got {len(row)}")
+                continue
+            matrix_data.append(row)
+        except ValueError:
+            print("Please enter valid numbers separated by spaces")
+    
+    if len(matrix_data) != rows:
+        print(f"Expected {rows} rows, got {len(matrix_data)}")
+        return get_custom_matrix()
+    
+    return np.array(matrix_data)
+
 def main():
     # Example matrices
     matrices = [
@@ -278,24 +320,38 @@ def main():
                   [1/4, 1/5, 1/6]])
     ]
     
-    # Print available matrices
-    print("Available matrices:")
-    for i, matrix in enumerate(matrices, 1):
-        print(f"\nMatrix {i}:")
-        print_matrix(matrix)
-    
-    # Get user input
+    # Get user choice
     while True:
         try:
-            choice = int(input("\nEnter the matrix number you want to solve (1-10): "))
-            if 1 <= choice <= 10:
+            choice = int(input("Press 1 for predefined matrices or 2 for custom matrix: "))
+            if choice in [1, 2]:
                 break
-            print("Please enter a number between 1 and 10")
+            print("Please enter 1 or 2")
         except ValueError:
             print("Please enter a valid number")
     
-    matrix = matrices[choice - 1]
-    print(f"\n{'='*20} Matrix {choice} {'='*20}")
+    if choice == 1:
+        # Print available matrices
+        print("\nAvailable matrices:")
+        for i, matrix in enumerate(matrices, 1):
+            print(f"\nMatrix {i}:")
+            print_matrix(matrix)
+        
+        # Get matrix selection
+        while True:
+            try:
+                matrix_choice = int(input("\nEnter the matrix number you want to solve (1-10): "))
+                if 1 <= matrix_choice <= 10:
+                    break
+                print("Please enter a number between 1 and 10")
+            except ValueError:
+                print("Please enter a valid number")
+        
+        matrix = matrices[matrix_choice - 1]
+    else:
+        matrix = get_custom_matrix()
+    
+    print(f"\n{'='*20} Matrix {'='*20}")
     print_matrix(matrix, "Original Matrix")
     
     # Check if matrix is already in RREF
