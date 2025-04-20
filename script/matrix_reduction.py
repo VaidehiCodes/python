@@ -108,6 +108,7 @@ def to_row_echelon(matrix: np.ndarray) -> Tuple[np.ndarray, List[str]]:
         if max_row != col:
             ref_matrix[[col, max_row]] = ref_matrix[[max_row, col]]
             steps.append(f"R{col+1} ↔ R{max_row+1}")
+            steps.append(matrix_to_fraction_string(ref_matrix))
         
         # Skip if the pivot is zero
         if ref_matrix[col, col] == 0:
@@ -120,6 +121,7 @@ def to_row_echelon(matrix: np.ndarray) -> Tuple[np.ndarray, List[str]]:
                 factor = ref_matrix[row, col] / ref_matrix[col, col]
                 ref_matrix[row, col:] -= factor * ref_matrix[col, col:]
                 steps.append(f"R{row+1} = R{row+1} - ({Fraction(factor).limit_denominator()}) * R{col+1}")
+                steps.append(matrix_to_fraction_string(ref_matrix))
     
     return ref_matrix, steps
 
@@ -147,6 +149,7 @@ def to_reduced_row_echelon(matrix: np.ndarray) -> Tuple[np.ndarray, List[str]]:
         if max_row != col:
             rref_matrix[[col, max_row]] = rref_matrix[[max_row, col]]
             steps.append(f"R{col+1} ↔ R{max_row+1}")
+            steps.append(matrix_to_fraction_string(rref_matrix))
         
         if rref_matrix[col, col] == 0:
             steps.append(f"Pivot in column {col+1} is zero, moving to next column")
@@ -157,6 +160,7 @@ def to_reduced_row_echelon(matrix: np.ndarray) -> Tuple[np.ndarray, List[str]]:
             factor = rref_matrix[col, col]
             rref_matrix[col, :] /= factor
             steps.append(f"R{col+1} = R{col+1} / {Fraction(factor).limit_denominator()}")
+            steps.append(matrix_to_fraction_string(rref_matrix))
         
         # Eliminate all elements above and below the pivot
         for row in range(m):
@@ -164,6 +168,7 @@ def to_reduced_row_echelon(matrix: np.ndarray) -> Tuple[np.ndarray, List[str]]:
                 factor = rref_matrix[row, col]
                 rref_matrix[row, :] -= factor * rref_matrix[col, :]
                 steps.append(f"R{row+1} = R{row+1} - ({Fraction(factor).limit_denominator()}) * R{col+1}")
+                steps.append(matrix_to_fraction_string(rref_matrix))
     
     return rref_matrix, steps
 
@@ -215,8 +220,12 @@ def print_steps(steps: List[str], title: str):
     """
     print(f"\n{title}:")
     print("=" * 50)
-    for step in steps:
-        print(step)
+    for i, step in enumerate(steps):
+        if i % 2 == 0:  # Operation description
+            print(f"\nStep {i//2 + 1}: {step}")
+        else:  # Matrix state
+            print("\nResulting matrix:")
+            print(step)
     print("=" * 50)
 
 def get_custom_matrix() -> np.ndarray:
