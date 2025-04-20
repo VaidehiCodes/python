@@ -228,8 +228,16 @@ def get_custom_matrix() -> np.ndarray:
     """
     while True:
         try:
-            rows = int(input("Enter number of rows: "))
-            cols = int(input("Enter number of columns: "))
+            rows_input = input("Enter number of rows (or 'exit' to quit): ")
+            if rows_input.lower() == 'exit':
+                exit(0)
+            rows = int(rows_input)
+            
+            cols_input = input("Enter number of columns (or 'exit' to quit): ")
+            if cols_input.lower() == 'exit':
+                exit(0)
+            cols = int(cols_input)
+            
             if rows > 0 and cols > 0:
                 break
             print("Please enter positive integers for dimensions")
@@ -239,11 +247,14 @@ def get_custom_matrix() -> np.ndarray:
     print("\nEnter matrix elements row by row:")
     print("Use spaces to separate elements")
     print("Press Enter after each row")
-    print("Press Enter twice when done\n")
+    print("Press Enter twice when done")
+    print("Type 'exit' at any time to quit\n")
     
     matrix_data = []
     while True:
         row_input = input()
+        if row_input.lower() == 'exit':
+            exit(0)
         if not row_input:  # Empty line means end of input
             break
         try:
@@ -323,7 +334,10 @@ def main():
     # Get user choice
     while True:
         try:
-            choice = int(input("Press 1 for predefined matrices or 2 for custom matrix: "))
+            choice_input = input("Press 1 for predefined matrices, 2 for custom matrix, or 'exit' to quit: ")
+            if choice_input.lower() == 'exit':
+                exit(0)
+            choice = int(choice_input)
             if choice in [1, 2]:
                 break
             print("Please enter 1 or 2")
@@ -340,7 +354,10 @@ def main():
         # Get matrix selection
         while True:
             try:
-                matrix_choice = int(input("\nEnter the matrix number you want to solve (1-10): "))
+                matrix_choice_input = input("\nEnter the matrix number you want to solve (1-10) or 'exit' to quit: ")
+                if matrix_choice_input.lower() == 'exit':
+                    exit(0)
+                matrix_choice = int(matrix_choice_input)
                 if 1 <= matrix_choice <= 10:
                     break
                 print("Please enter a number between 1 and 10")
