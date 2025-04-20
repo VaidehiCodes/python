@@ -107,7 +107,7 @@ def to_row_echelon(matrix: np.ndarray) -> Tuple[np.ndarray, List[str]]:
         # Swap rows if necessary
         if max_row != col:
             ref_matrix[[col, max_row]] = ref_matrix[[max_row, col]]
-            steps.append(f"R{col+1} ↔ R{max_row+1}")
+            steps.append(f"Row Swap: R{col+1} ↔ R{max_row+1}")
             steps.append(matrix_to_fraction_string(ref_matrix))
         
         # Skip if the pivot is zero
@@ -120,7 +120,7 @@ def to_row_echelon(matrix: np.ndarray) -> Tuple[np.ndarray, List[str]]:
             if ref_matrix[row, col] != 0:
                 factor = ref_matrix[row, col] / ref_matrix[col, col]
                 ref_matrix[row, col:] -= factor * ref_matrix[col, col:]
-                steps.append(f"R{row+1} = R{row+1} - ({Fraction(factor).limit_denominator()}) * R{col+1}")
+                steps.append(f"Row Operation: R{row+1} = R{row+1} - ({Fraction(factor).limit_denominator()}) * R{col+1}")
                 steps.append(matrix_to_fraction_string(ref_matrix))
     
     return ref_matrix, steps
@@ -148,7 +148,7 @@ def to_reduced_row_echelon(matrix: np.ndarray) -> Tuple[np.ndarray, List[str]]:
         
         if max_row != col:
             rref_matrix[[col, max_row]] = rref_matrix[[max_row, col]]
-            steps.append(f"R{col+1} ↔ R{max_row+1}")
+            steps.append(f"Row Swap: R{col+1} ↔ R{max_row+1}")
             steps.append(matrix_to_fraction_string(rref_matrix))
         
         if rref_matrix[col, col] == 0:
@@ -159,7 +159,7 @@ def to_reduced_row_echelon(matrix: np.ndarray) -> Tuple[np.ndarray, List[str]]:
         if rref_matrix[col, col] != 1:
             factor = rref_matrix[col, col]
             rref_matrix[col, :] /= factor
-            steps.append(f"R{col+1} = R{col+1} / {Fraction(factor).limit_denominator()}")
+            steps.append(f"Row Operation: R{col+1} = R{col+1} / {Fraction(factor).limit_denominator()}")
             steps.append(matrix_to_fraction_string(rref_matrix))
         
         # Eliminate all elements above and below the pivot
@@ -167,7 +167,7 @@ def to_reduced_row_echelon(matrix: np.ndarray) -> Tuple[np.ndarray, List[str]]:
             if row != col and rref_matrix[row, col] != 0:
                 factor = rref_matrix[row, col]
                 rref_matrix[row, :] -= factor * rref_matrix[col, :]
-                steps.append(f"R{row+1} = R{row+1} - ({Fraction(factor).limit_denominator()}) * R{col+1}")
+                steps.append(f"Row Operation: R{row+1} = R{row+1} - ({Fraction(factor).limit_denominator()}) * R{col+1}")
                 steps.append(matrix_to_fraction_string(rref_matrix))
     
     return rref_matrix, steps
@@ -220,12 +220,16 @@ def print_steps(steps: List[str], title: str):
     """
     print(f"\n{title}:")
     print("=" * 50)
+    step_count = 0
     for i, step in enumerate(steps):
         if i % 2 == 0:  # Operation description
-            print(f"\nStep {i//2 + 1}: {step}")
+            step_count += 1
+            print(f"\nStep {step_count}: {step}")
+            print("-" * 30)
         else:  # Matrix state
-            print("\nResulting matrix:")
+            print("\nMatrix after operation:")
             print(step)
+            print("-" * 30)
     print("=" * 50)
 
 def get_custom_matrix() -> np.ndarray:
