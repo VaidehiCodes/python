@@ -1,14 +1,39 @@
 import numpy as np
 from fractions import Fraction
 
+def get_solver_method():
+    print("\nChoose solving method:")
+    print("1. Gaussian Elimination (step-by-step)")
+    print("2. Check for Consistency and Solve")
+    print("Type 'exit' to quit the program")
+    
+    while True:
+        try:
+            choice_input = input("\nEnter your choice (1 or 2): ")
+            if choice_input.lower() == 'exit':
+                print("Exiting program...")
+                exit(0)
+            choice = int(choice_input)
+            if choice in [1, 2]:
+                return choice
+            else:
+                print("Invalid choice. Please enter 1 or 2.")
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+
 def get_variable_names():
     print("\nChoose variable naming convention:")
     print("1. x, y, z")
     print("2. x₁, x₂, x₃")
+    print("Type 'exit' to quit the program")
     
     while True:
         try:
-            choice = int(input("\nEnter your choice (1 or 2): "))
+            choice_input = input("\nEnter your choice (1 or 2): ")
+            if choice_input.lower() == 'exit':
+                print("Exiting program...")
+                exit(0)
+            choice = int(choice_input)
             if choice == 1:
                 return ["x", "y", "z"]
             elif choice == 2:
@@ -20,15 +45,36 @@ def get_variable_names():
 
 def get_coefficients(var_names):
     print(f"\nEnter coefficients for 3 equations (a{var_names[0]} + b{var_names[1]} + c{var_names[2]} = d):")
+    print("Type 'exit' at any prompt to quit the program")
     equations = []
     
     for i in range(3):
         print(f"\nEquation {i+1}:")
         try:
-            a = Fraction(input(f"Enter coefficient for {var_names[0]}: "))
-            b = Fraction(input(f"Enter coefficient for {var_names[1]}: "))
-            c = Fraction(input(f"Enter coefficient for {var_names[2]}: "))
-            d = Fraction(input("Enter constant term: "))
+            a_input = input(f"Enter coefficient for {var_names[0]}: ")
+            if a_input.lower() == 'exit':
+                print("Exiting program...")
+                exit(0)
+            a = Fraction(a_input).limit_denominator()
+            
+            b_input = input(f"Enter coefficient for {var_names[1]}: ")
+            if b_input.lower() == 'exit':
+                print("Exiting program...")
+                exit(0)
+            b = Fraction(b_input).limit_denominator()
+            
+            c_input = input(f"Enter coefficient for {var_names[2]}: ")
+            if c_input.lower() == 'exit':
+                print("Exiting program...")
+                exit(0)
+            c = Fraction(c_input).limit_denominator()
+            
+            d_input = input("Enter constant term: ")
+            if d_input.lower() == 'exit':
+                print("Exiting program...")
+                exit(0)
+            d = Fraction(d_input).limit_denominator()
+            
             equations.append([a, b, c, d])
         except ValueError:
             print("Invalid input. Please enter numbers or fractions (e.g., 2 or 1/2)")
@@ -36,9 +82,51 @@ def get_coefficients(var_names):
     
     return equations
 
+def check_consistency(matrix):
+    """
+    Check if the system of equations is consistent.
+    Returns:
+    - "consistent-unique": System has a unique solution
+    - "consistent-infinite": System has infinitely many solutions
+    - "inconsistent": System has no solution
+    """
+    # Create coefficient matrix A and constant matrix B
+    A = [row[:3] for row in matrix]
+    B = [row[3] for row in matrix]
+    
+    # Convert to numpy arrays for rank calculation
+    A_np = np.array([[float(x) for x in row] for row in A])
+    AB_np = np.array([[float(x) for x in row] for row in matrix])
+    
+    rank_A = np.linalg.matrix_rank(A_np)
+    rank_AB = np.linalg.matrix_rank(AB_np)
+    
+    if rank_A < rank_AB:
+        return "inconsistent"
+    elif rank_A < 3:  # Number of variables = 3
+        return "consistent-infinite"
+    else:
+        return "consistent-unique"
+
+def solve_system_directly(matrix, var_names):
+    """
+    Solve the system directly using numpy's linear algebra functions.
+    """
+    # Create coefficient matrix A and constant matrix B
+    A = np.array([[float(x) for x in row[:3]] for row in matrix])
+    B = np.array([float(row[3]) for row in matrix])
+    
+    try:
+        solution = np.linalg.solve(A, B)
+        # Convert solution to fractions
+        frac_solution = [Fraction(x).limit_denominator() for x in solution]
+        return frac_solution
+    except np.linalg.LinAlgError:
+        return None
+
 def print_matrix(matrix):
     # Print top divider
-    print("+" + "-" * 35 + "+")
+    print("+" + "-" * 40 + "+")
     
     for row in matrix:
         print("|", end=" ")
@@ -46,31 +134,31 @@ def print_matrix(matrix):
         for i in range(len(row) - 1):
             element = row[i]
             if isinstance(element, Fraction):
+                element = element.limit_denominator()
                 if element.denominator == 1:
-                    print(f"{element.numerator:3}", end=" ")
+                    print(f"{element.numerator:5}", end=" ")
                 else:
-                    num = element.numerator
-                    den = element.denominator
-                    print(f"{num}/{den:3}", end=" ")
+                    frac_str = f"{element.numerator}/{element.denominator}"
+                    print(f"{frac_str:5}", end=" ")
             else:
-                print(f"{element:3}", end=" ")
+                print(f"{element:5}", end=" ")
         
         # Print vertical line and constant
         print("|", end=" ")
         element = row[-1]
         if isinstance(element, Fraction):
+            element = element.limit_denominator()
             if element.denominator == 1:
-                print(f"{element.numerator:3}", end=" ")
+                print(f"{element.numerator:5}", end=" ")
             else:
-                num = element.numerator
-                den = element.denominator
-                print(f"{num}/{den:3}", end=" ")
+                frac_str = f"{element.numerator}/{element.denominator}"
+                print(f"{frac_str:5}", end=" ")
         else:
-            print(f"{element:3}", end=" ")
+            print(f"{element:5}", end=" ")
         print("|")
     
     # Print bottom divider
-    print("+" + "-" * 35 + "+")
+    print("+" + "-" * 40 + "+")
     print()  # Add extra line for spacing
 
 def is_singular(matrix):
@@ -192,20 +280,63 @@ def main():
     print("=" * 50)
     
     var_names = get_variable_names()
+    solver_method = get_solver_method()
+    
     equations = get_coefficients(var_names)
     if equations is None:
         return
     
     matrix = [row[:] for row in equations]  # Create a copy of the equations
     
-    solution = gaussian_elimination(matrix, var_names)
-    if solution is not None:
+    if solver_method == 1:
+        # Original Gaussian elimination step-by-step
+        solution = gaussian_elimination(matrix, var_names)
+        if solution is not None:
+            print("\n" + "=" * 50)
+            print("FINAL SOLUTION".center(50))
+            print("=" * 50)
+            for i in range(len(solution)):
+                print(f"\n     {var_names[i]} = {solution[i]}")
+            print("\n" + "=" * 50)
+    else:
+        # Check for consistency and solve
         print("\n" + "=" * 50)
-        print("FINAL SOLUTION".center(50))
+        print("CHECKING SYSTEM CONSISTENCY".center(50))
         print("=" * 50)
-        for i in range(len(solution)):
-            print(f"\n     {var_names[i]} = {solution[i]}")
-        print("\n" + "=" * 50)
+        
+        print("\nAugmented Matrix:")
+        print_matrix(matrix)
+        
+        consistency = check_consistency(matrix)
+        
+        if consistency == "inconsistent":
+            print("\n" + "!" * 50)
+            print("SYSTEM IS INCONSISTENT".center(50))
+            print("The system has no solution.".center(50))
+            print("!" * 50 + "\n")
+        
+        elif consistency == "consistent-infinite":
+            print("\n" + "=" * 50)
+            print("SYSTEM IS CONSISTENT".center(50))
+            print("The system has infinitely many solutions.".center(50))
+            print("=" * 50 + "\n")
+            
+            # We could parameterize the solution here if needed
+        
+        else:  # consistent-unique
+            print("\n" + "=" * 50)
+            print("SYSTEM IS CONSISTENT".center(50))
+            print("The system has a unique solution.".center(50))
+            print("=" * 50 + "\n")
+            
+            solution = solve_system_directly(matrix, var_names)
+            
+            print("\n" + "=" * 50)
+            print("SOLUTION".center(50))
+            print("=" * 50)
+            for i in range(len(solution)):
+                print(f"\n     {var_names[i]} = {solution[i]}")
+            print("\n" + "=" * 50)
 
 if __name__ == "__main__":
     main() 
