@@ -1,16 +1,33 @@
 import numpy as np
 from fractions import Fraction
 
-def get_coefficients():
-    print("Enter coefficients for 3 equations (ax + by + cz = d):")
+def get_variable_names():
+    print("\nChoose variable naming convention:")
+    print("1. x, y, z")
+    print("2. x₁, x₂, x₃")
+    
+    while True:
+        try:
+            choice = int(input("\nEnter your choice (1 or 2): "))
+            if choice == 1:
+                return ["x", "y", "z"]
+            elif choice == 2:
+                return ["x₁", "x₂", "x₃"]
+            else:
+                print("Invalid choice. Please enter 1 or 2.")
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+
+def get_coefficients(var_names):
+    print(f"\nEnter coefficients for 3 equations (a{var_names[0]} + b{var_names[1]} + c{var_names[2]} = d):")
     equations = []
     
     for i in range(3):
         print(f"\nEquation {i+1}:")
         try:
-            a = Fraction(input("Enter coefficient for x: "))
-            b = Fraction(input("Enter coefficient for y: "))
-            c = Fraction(input("Enter coefficient for z: "))
+            a = Fraction(input(f"Enter coefficient for {var_names[0]}: "))
+            b = Fraction(input(f"Enter coefficient for {var_names[1]}: "))
+            c = Fraction(input(f"Enter coefficient for {var_names[2]}: "))
             d = Fraction(input("Enter constant term: "))
             equations.append([a, b, c, d])
         except ValueError:
@@ -30,22 +47,26 @@ def print_matrix(matrix):
             element = row[i]
             if isinstance(element, Fraction):
                 if element.denominator == 1:
-                    print(f"{element.numerator:5}", end=" ")
+                    print(f"{element.numerator:3}", end=" ")
                 else:
-                    print(f"{element.numerator}/{element.denominator:5}", end=" ")
+                    num = element.numerator
+                    den = element.denominator
+                    print(f"{num}/{den:3}", end=" ")
             else:
-                print(f"{element:5}", end=" ")
+                print(f"{element:3}", end=" ")
         
         # Print vertical line and constant
         print("|", end=" ")
         element = row[-1]
         if isinstance(element, Fraction):
             if element.denominator == 1:
-                print(f"{element.numerator:5}", end=" ")
+                print(f"{element.numerator:3}", end=" ")
             else:
-                print(f"{element.numerator}/{element.denominator:5}", end=" ")
+                num = element.numerator
+                den = element.denominator
+                print(f"{num}/{den:3}", end=" ")
         else:
-            print(f"{element:5}", end=" ")
+            print(f"{element:3}", end=" ")
         print("|")
     
     # Print bottom divider
@@ -57,7 +78,7 @@ def is_singular(matrix):
     A = np.array([[float(x) for x in row[:3]] for row in matrix])
     return np.linalg.det(A) == 0
 
-def gaussian_elimination(matrix):
+def gaussian_elimination(matrix, var_names):
     n = len(matrix)
     step = 1
     
@@ -147,7 +168,7 @@ def gaussian_elimination(matrix):
                 return None
         
         x[i] = matrix[i][n]
-        substitution = f"x{i+1} = {x[i]}"
+        substitution = f"{var_names[i]} = {x[i]}"
         
         for j in range(i + 1, n):
             if matrix[i][j] != 0:
@@ -160,7 +181,7 @@ def gaussian_elimination(matrix):
         x[i] = x[i] / matrix[i][i]
         print(f"\nStep {step}: {substitution}")
         print(f"     {'=' * 20}")
-        print(f"     x{i+1} = {x[i]}")
+        print(f"     {var_names[i]} = {x[i]}")
         step += 1
     
     return x
@@ -170,20 +191,20 @@ def main():
     print("SYSTEM OF EQUATIONS SOLVER".center(50))
     print("=" * 50)
     
-    equations = get_coefficients()
+    var_names = get_variable_names()
+    equations = get_coefficients(var_names)
     if equations is None:
         return
     
     matrix = [row[:] for row in equations]  # Create a copy of the equations
     
-    solution = gaussian_elimination(matrix)
+    solution = gaussian_elimination(matrix, var_names)
     if solution is not None:
         print("\n" + "=" * 50)
         print("FINAL SOLUTION".center(50))
         print("=" * 50)
-        print(f"\n     x = {solution[0]}")
-        print(f"     y = {solution[1]}")
-        print(f"     z = {solution[2]}")
+        for i in range(len(solution)):
+            print(f"\n     {var_names[i]} = {solution[i]}")
         print("\n" + "=" * 50)
 
 if __name__ == "__main__":
